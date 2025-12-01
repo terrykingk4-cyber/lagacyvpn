@@ -55,11 +55,20 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
 
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // کاربر اجازه داد -> عالی، کاری لازم نیست بکنیم
+            } else {
+                // کاربر اجازه نداد -> می‌توانید اینجا پیامی نشان دهید یا لاگ بگیرید
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+        checkAndRequestNotificationPermission()
         binding.navView.setNavigationItemSelectedListener(this)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
@@ -341,5 +350,24 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun checkAndRequestNotificationPermission() {
+        // این مجوز فقط در اندروید 13 (API 33) و بالاتر وجود دارد
+        if (Build.VERSION.SDK_INT >= 33) { // یا Build.VERSION_CODES.TIRAMISU
+            // آیا مجوز قبلاً داده شده است؟
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                // حالت اول: مجوز باز است (Granted)
+                // هیچ کاری نمی‌کنیم (طبق خواسته شما)
+            } else {
+                // حالت دوم: مجوز داده نشده (Denied)
+                // درخواست نمایش دیالوگ مجوز را ارسال می‌کنیم
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 }
