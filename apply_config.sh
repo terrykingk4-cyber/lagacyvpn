@@ -13,6 +13,19 @@ fi
 # تذکر: فایل باید دقیقاً فرمت key=value داشته باشد و فاصله نداشته باشد
 source "$CONFIG_FILE"
 
+# تابع برای حذف اینتر (\n) و کاراکترهای CR (\r) از انتهای مقدارها
+clean_value() {
+    # تمام \r و \n را حذف می‌کند
+    printf '%s' "$1" | tr -d '\r\n'
+}
+
+# تمیز کردن مقدار متغیرها (حذف اینتر و CR)
+appname="$(clean_value "$appname")"
+appid="$(clean_value "$appid")"
+appversion="$(clean_value "$appversion")"
+appversioncode="$(clean_value "$appversioncode")"
+appdomain="$(clean_value "$appdomain")"
+
 echo "--- Applying Configurations ---"
 echo "App Name: $appname"
 echo "App ID: $appid"
