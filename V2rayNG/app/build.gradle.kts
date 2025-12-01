@@ -9,11 +9,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.v2ray.ang"
+        applicationId = "com.lagacy.lagacyvpn"
         minSdk = 21
         targetSdk = 35
-        versionCode = 679
-        versionName = "1.10.28"
+        versionCode = 1
+        versionName = "1.0.0"
         multiDexEnabled = true
 
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
@@ -38,6 +38,33 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release").apply {
+            // تغییر نام متغیرها به نام‌های سفارشی
+            val storeFileProp = project.findProperty("MY_APP_STORE_FILE") as String?
+            val storePasswordProp = project.findProperty("MY_APP_STORE_PASSWORD") as String?
+            val keyAliasProp = project.findProperty("MY_APP_KEY_ALIAS") as String?
+            val keyPasswordProp = project.findProperty("MY_APP_KEY_PASSWORD") as String?
+
+            // اضافه کردن لاگ برای دیباگ کردن (فقط مسیر فایل چاپ می‌شود، پسوردها امن می‌مانند)
+            println("Signing Debug: StoreFile: $storeFileProp, Alias: $keyAliasProp")
+
+            if (
+                !storeFileProp.isNullOrEmpty() &&
+                !storePasswordProp.isNullOrEmpty() &&
+                !keyAliasProp.isNullOrEmpty() &&
+                !keyPasswordProp.isNullOrEmpty()
+            ) {
+                storeFile = file(storeFileProp)
+                storePassword = storePasswordProp
+                keyAlias = keyAliasProp
+                keyPassword = keyPasswordProp
+            } else {
+                println("Signing Debug: One or more signing properties are missing!")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -58,6 +85,7 @@ android {
         create("playstore") {
             dimension = "distribution"
             buildConfigField("String", "DISTRIBUTION", "\"Play Store\"")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -90,7 +118,7 @@ android {
                 .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
                 .forEach { output ->
                     val abi = output.getFilter("ABI") ?: "universal"
-                    output.outputFileName = "v2rayNG_${variant.versionName}-fdroid_${abi}.apk"
+                    output.outputFileName = "free_vpn_${variant.versionName}-fdroid_${abi}.apk"
                     if (versionCodes.containsKey(abi)) {
                         output.versionCodeOverride =
                             (100 * variant.versionCode + versionCodes[abi]!!).plus(5000000)
@@ -110,7 +138,7 @@ android {
                     else
                         "universal"
 
-                    output.outputFileName = "v2rayNG_${variant.versionName}_${abi}.apk"
+                    output.outputFileName = "free_vpn_${variant.versionName}_${abi}.apk"
                     if (versionCodes.containsKey(abi)) {
                         output.versionCodeOverride =
                             (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
@@ -188,4 +216,10 @@ dependencies {
     testImplementation(libs.org.mockito.mockito.inline)
     testImplementation(libs.mockito.kotlin)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
 }

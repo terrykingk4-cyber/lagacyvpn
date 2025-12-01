@@ -11,4 +11,10 @@
 
     <color name="colorPrimary">#F5F5F5</color>
     <color name="colorAccent">#000000</color>
+    
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="brand_green_light">#10ce94</color>
+    <color name="brand_green_dark">#10b57c</color>
 </resources>
