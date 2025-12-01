@@ -9,17 +9,18 @@ if [ ! -f "$CONFIG_FILE" ]; then
     exit 1
 fi
 
+# تبدیل CRLF (ویندوز) به LF (لینوکس) تا \r باعث خراب شدن source نشود
+sed -i 's/\r$//' "$CONFIG_FILE"
+
 # خواندن متغیرها از فایل
-# تذکر: فایل باید دقیقاً فرمت key=value داشته باشد و فاصله نداشته باشد
 source "$CONFIG_FILE"
 
-# تابع برای حذف اینتر (\n) و کاراکترهای CR (\r) از انتهای مقدارها
+# تابع برای حذف \n و \r از مقادیر
 clean_value() {
-    # تمام \r و \n را حذف می‌کند
     printf '%s' "$1" | tr -d '\r\n'
 }
 
-# تمیز کردن مقدار متغیرها (حذف اینتر و CR)
+# پاکسازی مقادیر
 appname="$(clean_value "$appname")"
 appid="$(clean_value "$appid")"
 appversion="$(clean_value "$appversion")"
@@ -38,7 +39,6 @@ GRADLE_FILE="V2rayNG/app/build.gradle.kts"
 API_SERVICE="V2rayNG/app/src/main/java/com/v2ray/ang/service/ApiService.kt"
 
 # 1. تغییر نام برنامه در strings.xml
-# پیدا کردن خطی که app_name دارد و جایگزینی مقدار داخل تگ
 sed -i "s|<string name=\"app_name\" translatable=\"false\">.*</string>|<string name=\"app_name\" translatable=\"false\">$appname</string>|g" "$STRINGS_XML"
 
 # 2. تغییر applicationId در build.gradle.kts
