@@ -120,6 +120,10 @@ jobs:
         fileName: "android_keystore.jks"
         encodedString: ${{ secrets.APP_KEYSTORE_BASE64 }}
 
+    - name: put config file to files
+      run: |
+        bash apply_config.sh
+
     - name: Build APK
       run: |
         cd ${{ github.workspace }}/V2rayNG
