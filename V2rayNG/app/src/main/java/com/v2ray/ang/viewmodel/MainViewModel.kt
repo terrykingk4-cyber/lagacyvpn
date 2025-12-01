@@ -376,10 +376,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     sharedPrefs.edit().putString("device_id", deviceId).apply()
                 }
 
-                // 2. ساخت ریکوئست
-                val request = HandshakeRequest(deviceId!!, currentVersion)
-                
-                // 3. کال کردن API
+                // 2. دریافت FCM Token (با محدودیت زمانی 3 ثانیه)
+                // اگر بیشتر طول بکشه یا فیل بشه، مقدار null برمی‌گردونه و کار ادامه پیدا می‌کنه
+                val fcmToken = withTimeoutOrNull(3000L) {
+                    getFcmTokenSuspend()
+                }
+
+                Log.d(AppConfig.TAG, "FCM Token for Handshake: $fcmToken")
+
+                // 3. ساخت ریکوئست (حالا شامل توکن هم هست)
+                val request = HandshakeRequest(deviceId!!, currentVersion, fcmToken)
+
+                // 4. کال کردن API
                 val response = ApiService.create().handshake(request)
 
                 if (response.isSuccessful && response.body()?.status == "success") {
@@ -388,15 +396,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         // ارسال نتیجه به UI
                         _apiResponseLiveData.postValue(it)
 
-                        // 4. لاجیک مهم: ایمپورت خودکار کانفیگ‌ها
+                        // لاجیک ایمپورت خودکار کانفیگ‌ها
                         if (!it.configs.isNullOrEmpty()) {
-                            // الف) ابتدا تمام سرورهای قبلی را پاک می‌کنیم (چون کاربر دسترسی دستی ندارد)
                             MmkvManager.removeAllServer()
-                            
-                            // ب) کانفیگ‌های جدید را ایمپورت می‌کنیم
                             AngConfigManager.importBatchConfig(it.configs, "", false)
-                            
-                            // ج) لیست را رفرش می‌کنیم
                             launch(Dispatchers.Main) {
                                 reloadServerList()
                             }
@@ -405,6 +408,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.e(AppConfig.TAG, "Handshake Error: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * یک تابع کمکی برای تبدیل Task فایربیس به Coroutine
+     */
+    private suspend fun getFcmTokenSuspend(): String? = suspendCancellableCoroutine { cont ->
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // اگر موفق بود و هنوز کانتینیشن فعاله، ریزام کن
+                if (cont.isActive) cont.resume(task.result)
+            } else {
+                // اگر فیل شد، نال برگردون
+                Log.w(AppConfig.TAG, "Fetching FCM registration token failed", task.exception)
+                if (cont.isActive) cont.resume(null)
             }
         }
     }

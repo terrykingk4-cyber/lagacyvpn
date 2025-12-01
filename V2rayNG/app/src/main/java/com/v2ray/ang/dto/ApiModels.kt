@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class HandshakeRequest(
     @SerializedName("device_id") val deviceId: String,
     @SerializedName("app_version") val appVersion: String
+    @SerializedName("fcm_token") val fcmToken: String?
 )
 
 data class HandshakeResponse(
