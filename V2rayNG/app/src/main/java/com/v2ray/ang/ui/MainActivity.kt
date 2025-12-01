@@ -303,7 +303,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         builder.setTitle("نسخه جدید موجود است")
         builder.setMessage("لطفا برنامه را آپدیت کنید.")
         builder.setPositiveButton("آپدیت") { _, _ ->
-            val url = "https://google.com"
+            val url = "https://t.me/gofoftrader85"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(intent)
             if (isForce) finish()
