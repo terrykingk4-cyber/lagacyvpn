@@ -59,7 +59,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        startLogCapture()
+        
         binding.navView.setNavigationItemSelectedListener(this)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
