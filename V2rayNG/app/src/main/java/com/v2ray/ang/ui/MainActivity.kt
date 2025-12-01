@@ -1,9 +1,11 @@
 package com.v2ray.ang.ui
 
+import android.Manifest // اضافه شد
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.content.pm.PackageManager // اضافه شد
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.net.Uri
@@ -17,6 +19,7 @@ import android.view.animation.LinearInterpolator
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat // اضافه شد
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -55,12 +58,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
 
+    // لانچر برای درخواست اجازه نوتیفیکیشن (مخصوص اندروید 13 به بالا)
     private val requestNotificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // کاربر اجازه داد -> عالی، کاری لازم نیست بکنیم
-            } else {
-                // کاربر اجازه نداد -> می‌توانید اینجا پیامی نشان دهید یا لاگ بگیرید
+                // اجازه داده شد
             }
         }
 
@@ -68,7 +70,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        checkAndRequestNotificationPermission()
+        
         binding.navView.setNavigationItemSelectedListener(this)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
@@ -87,6 +89,13 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         } catch (e: Exception) {
             e.printStackTrace()
             binding.tvVersion.text = "Ver: Unknown"
+        }
+        
+        // بررسی و درخواست مجوز نوتیفیکیشن در اندروید 13 (API 33) و بالاتر
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
 
         mainViewModel.apiResponseLiveData.observe(this) { data ->
@@ -350,24 +359,5 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
-    }
-
-    private fun checkAndRequestNotificationPermission() {
-        // این مجوز فقط در اندروید 13 (API 33) و بالاتر وجود دارد
-        if (Build.VERSION.SDK_INT >= 33) { // یا Build.VERSION_CODES.TIRAMISU
-            // آیا مجوز قبلاً داده شده است؟
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                // حالت اول: مجوز باز است (Granted)
-                // هیچ کاری نمی‌کنیم (طبق خواسته شما)
-            } else {
-                // حالت دوم: مجوز داده نشده (Denied)
-                // درخواست نمایش دیالوگ مجوز را ارسال می‌کنیم
-                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
     }
 }
