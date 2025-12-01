@@ -115,26 +115,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-        <ScrollView
-            android:id="@+id/scroll_log"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="#CC000000"
-            android:padding="8dp"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <TextView
-                android:id="@+id/tv_live_log"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#00FF00"
-                android:textSize="10sp"
-                android:fontFamily="monospace"
-                android:text="Waiting for logs..." />
-        </ScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
