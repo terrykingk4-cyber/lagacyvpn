@@ -41,22 +41,3 @@ sed -i "s|versionCode = [0-9]*|versionCode = $appversioncode|g" "$GRADLE_FILE"
 sed -i "s|private const val BASE_URL = \".*\"|private const val BASE_URL = \"$appdomain\"|g" "$API_SERVICE"
 
 echo "--- Configuration Applied Successfully ---"
-```
-*(نکته: `sed -i` فایل را درجا ویرایش می‌کند. از کاراکتر `|` به عنوان جداکننده استفاده کردم تا با `/` های داخل URL تداخل نداشته باشد.)*
-
-### ۳. اضافه کردن به ورک‌فلو (GitHub Actions)
-
-حالا باید به فایل `yml` ورک‌فلو خود در گیت‌هاب بگویید که قبل از بیلد گرفتن، این اسکریپت را اجرا کند.
-
-فایل ورک‌فلو (مثلاً `.github/workflows/android.yml`) را باز کنید و مرحله (Step) زیر را **قبل از** مرحله‌ی `Build with Gradle` اضافه کنید:
-
-```yaml
-      # ... مراحل قبلی (مثل Checkout و Setup Java) ...
-
-      - name: Make script executable
-        run: chmod +x apply_config.sh
-
-      - name: Apply Custom Configuration
-        run: ./apply_config.sh
-
-      # ... مرحله بعدی (Build with Gradle) ...
