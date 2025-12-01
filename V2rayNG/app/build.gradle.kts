@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.jaredsburrows.license")
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
 }
 
 android {
